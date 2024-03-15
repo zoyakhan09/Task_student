@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Task Manager</title>
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+  <body>
+    <div class="container">
+      <h1>Task Manager</h1>
+
+      <div class="task-form">
+        <label for="courseId">Course ID:</label>
+        <input type="text" id="courseId" required />
+
+        <label for="taskName">Task Name:</label>
+        <input type="text" id="taskName" required />
+
+        <label for="dueDate">Due Date:</label>
+        <input type="date" id="dueDate" required />
+
+        <label for="additionalDetails">Additional Details:</label>
+        <textarea id="additionalDetails"></textarea>
+
+        <button onclick="postTask()">Add Task</button>
+      </div>
+
+      <div class="task-list">
+        <h2>Task List</h2>
+        <ul id="taskList"></ul>
+      </div>
+    </div>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", getTasks);
+
+      function postTask() {
+        const courseId = document.getElementById("courseId").value;
+        const taskName = document.getElementById("taskName").value;
+        const dueDate = document.getElementById("dueDate").value;
+        const additionalDetails =
+          document.getElementById("additionalDetails").value;
+
+        fetch("http://localhost:3000/posttask", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Access-Control-Allow-Origin": "*",
+          },
+          body: JSON.stringify({
+            courseId,
+            taskName,
+            dueDate,
+            additionalDetails,
+          }),
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            console.log("Task added successfully:", data);
+            location.reload();
+          })
+          .catch((error) => {
+            console.error("Error adding task:", error);
+          });
+      }
+
+      function getTasks() {
+        fetch("http://localhost:3000/", {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            "Access-Control-Allow-Origin": "*",
+          },
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            displayTasks(data);
+          })
+          .catch((error) => {
+            console.error("Error fetching tasks:", error);
+          });
+      }
+
+      function displayTasks(tasks) {
+        const taskList = document.getElementById("taskList");
+        taskList.innerHTML = "";
+
+        tasks.forEach((task) => {
+          const li = document.createElement("li");
+          li.textContent = `Course ID: ${task.courseId}, Task Name: ${
+            task.taskName
+          }, Due Date: ${task.dueDate}, Additional Details: ${
+            task.additionalDetails || "N/A"
+          }`;
+          taskList.appendChild(li);
+          
+        });
+      }
+    </script>
+  </body>
+</html>
